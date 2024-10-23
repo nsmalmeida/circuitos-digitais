@@ -26,7 +26,7 @@
 
 @font-face {
     font-family: 'Poppins';
-    src: url('./Poppins-Regular.ttf');
+    src: url('./fonts/Poppins-Regular.ttf');
 }
 
 body, html {
@@ -682,7 +682,8 @@ a[octet-casev='5'], a[octet-casev='6'] {
     }
 
     .truthtable-container {
-        margin: 48px 0;
+        margin-top: 48px;
+        margin-bottom: 32px;
         max-height: 700px;
         width: auto;
     }
@@ -709,6 +710,7 @@ a[octet-casev='5'], a[octet-casev='6'] {
 
     .simplifiedexpression {
         width: auto;
+        top: calc(100% + 32px);
     }
 
     .simplifiedexpression p {
@@ -718,7 +720,8 @@ a[octet-casev='5'], a[octet-casev='6'] {
 
     .simplifiedexpression.show {
         margin-bottom: 20px;
-        min-width: 100%;;
+        width: 100%;
+        border-radius: 0;
         transform: translate(-50%);
     }
 
