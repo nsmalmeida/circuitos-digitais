@@ -704,7 +704,7 @@ a[octet-casev='5'], a[octet-casev='6'] {
     
     .container-karnaughmap {
         font-size: 1.2rem;
-        margin-bottom: 2rem;
+        margin: 1rem;
     }
 
     .simplifiedexpression {
