@@ -720,7 +720,7 @@ a[octet-casev='5'], a[octet-casev='6'] {
 
     .simplifiedexpression.show {
         margin-bottom: 20px;
-        width: 100%;
+        width: 100vw;
         border-radius: 0;
         transform: translate(-50%);
     }
