@@ -228,8 +228,25 @@ body, html {
 
 /* Truth-table -> Table Body */
 
+.truthtable-body-variables {
+    display: flex;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+.truthtable-body-variables p {
+    width: 1.7em;
+}
+
+.truthtable-body-variables p:last-child {
+    width: 2.1em;
+}
+
 .truthtable-body-container {
     align-self: center;
+}
+
+.scroll-wrapper-container {
     overflow-y: hidden;
     max-height: 80%;
     border-radius: 1em;

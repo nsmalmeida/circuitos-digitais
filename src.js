@@ -14,9 +14,15 @@ const events = { // Armazena quais eventos já foram disparados
 }
 
 function createTruthTable(variaveis) {
+    const tbodyVariables = document.querySelector('.truthtable-body-variables')
     const truthTable = document.querySelector('.truthtable-body')
     const tbody = truthTable.getElementsByTagName('tbody')[0]
     const linhas = 2 ** variaveis
+    for(let i = 0; i <= variaveis; i++) {
+        const p = document.createElement('p')
+        i == variaveis ? p.innerText = 'X' : p.innerText = caracteres[i]
+        tbodyVariables.appendChild(p)
+    }
     for(let i = 0; i < linhas; i++){
         const newRow = tbody.insertRow()
         rowCollumOne = i.toString(2).padStart(variaveis, '0')
@@ -40,8 +46,10 @@ function createTruthTable(variaveis) {
 }
 
 function removeTruthTable() {
+    const tbodyVariables = document.querySelector('.truthtable-body-variables')
     const truthTable = document.querySelector('.truthtable-body')
     const tbody = truthTable.getElementsByTagName('tbody')[0]
+    tbodyVariables.innerHTML = ''
     tbody.innerHTML = ''
 }
 
@@ -63,19 +71,26 @@ dropdowns.forEach(dropdown => {
         option.addEventListener('click', () => {
             if(!events.truthtable){
                 const truthTableContainer = document.querySelector('.truthtable-container')
+                const divVariables = document.createElement('div')
                 const divBodyContainer = document.createElement('div')
+                const divScrollContainer = document.createElement('div')
                 const divScroll = document.createElement('div')
                 const table = document.createElement('table')
                 const tbody = document.createElement('tbody')
+                divVariables.classList.add('truthtable-body-variables')
                 divBodyContainer.classList.add('truthtable-body-container')
+                divScrollContainer.classList.add('scroll-wrapper-container')
                 divScroll.classList.add('scroll-wrapper')
                 table.classList.add('truthtable-body')
                 truthTableContainer.insertBefore(divBodyContainer, truthTableContainer.lastElementChild)
-                divBodyContainer.appendChild(divScroll)
+                divBodyContainer.appendChild(divVariables)
+                divBodyContainer.appendChild(divScrollContainer)
+                divScrollContainer.appendChild(divScroll)
                 divScroll.appendChild(table)
                 table.appendChild(tbody)
                 events.truthtable = true
             }
+            const tbody = document.createElement('tbody')
             removeTruthTable()
             createTruthTable(option.innerText)
             variables = option.innerText
@@ -351,37 +366,64 @@ function simplifyMap() {
             if(test){
                 switch(index){
                     case 0:
+                        console.log(`octeto caso ${index}`)
                         e.check = true
+                        e.grouping[2]++
                         e.right.check = true
+                        e.right.grouping[2]++
                         e.right.right.check = true
+                        e.right.right.grouping[2]++
                         e.right.right.right.check = true
+                        e.right.right.right.grouping[2]++
                         e.down.check = true
+                        e.down.grouping[2]++
                         e.down.right.check = true
+                        e.down.right.grouping[2]++
                         e.down.right.right.check = true
+                        e.down.right.right.grouping[2]++
                         e.down.right.right.right.check = true
+                        e.down.right.right.right.grouping[2]++
                         octetGrouping = [e, e.right, e.right.right, e.right.right.right, e.down, e.down.right, e.down.right.right, e.down.right.right.right, 'h']
                         break;
                     case 1:
+                        console.log(`octeto caso ${index}`)
                         e.check = true
+                        e.grouping[2]++
                         e.down.check = true
+                        e.down.grouping[2]++
                         e.down.down.check = true
+                        e.down.down.grouping[2]++
                         e.down.down.down.check = true
+                        e.down.down.down.grouping[2]++
                         e.right.check = true
+                        e.right.grouping[2]++
                         e.right.down.check = true
+                        e.right.down.grouping[2]++
                         e.right.down.down.check = true
+                        e.right.down.down.grouping[2]++
                         e.right.down.down.down.check = true
+                        e.right.down.down.down.grouping[2]++
                         octetGrouping = [e, e.down, e.down.down, e.down.down.down, e.right, e.right.down, e.right.down.down, e.right.down.down.down, 'v']
                         break;
                     case 2:
+                        console.log(`octeto caso ${index}`)
                         e.check = true
+                        e.grouping[2]++
                         e.down.check = true
+                        e.down.grouping[2]++
                         e.down.down.check = true
+                        e.down.down.grouping[2]++
                         e.down.down.down.check = true
+                        e.down.down.down.grouping[2]++
                         e.left.check = true
+                        e.left.grouping[2]++
                         e.left.down.check = true
+                        e.left.down.grouping[2]++
                         e.left.down.down.check = true
+                        e.left.down.down.grouping[2]++
                         e.left.down.down.down.check = true
-                        octetGrouping = [e, e.down, e.down.down, e.down.down.down, e.left, e.left.down, e.left.down.down, e.left.down.down.down, 'v']
+                        e.left.down.down.down.grouping[2]++
+                        octetGrouping = [e.left, e.left.down, e.left.down.down, e.left.down.down.down, e, e.down, e.down.down, e.down.down.down, 'v']
                 } return true
             } return false
         })
@@ -899,7 +941,6 @@ buttonCreateMap.addEventListener('click', () => {
                                 divRow.children[e[j].cindex].querySelectorAll(':not(:last-child)').forEach(e => expression.appendChild(e.cloneNode(true)))
                             }
                             const final = expression.querySelectorAll('span')
-                            console.log('final', final)
                             final.forEach(span => {
                                 const texto = span.textContent.trim(); // Obter o texto interno do span
                                 if (!spansPorTexto[texto]) {
