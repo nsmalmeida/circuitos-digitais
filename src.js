@@ -5,14 +5,17 @@ const caracteres = ['A','B','C','D','E','F','G','H']
 const oneVariable = ['0','1']
 const twoVariables = ['00','01','11','10']
 
-const events = { // Armazena quais eventos já foram disparados
+// Armazena quais eventos já foram disparados
+const events = { 
     truthtable: false,
     undo: false,
     complete0: false,
     complete1: false,
+    group: false,
     simplify: false
 }
 
+// Cria a tabela verdade
 function createTruthTable(variaveis) {
     const tbodyVariables = document.querySelector('.truthtable-body-variables')
     const truthTable = document.querySelector('.truthtable-body')
@@ -25,22 +28,28 @@ function createTruthTable(variaveis) {
     }
     for(let i = 0; i < linhas; i++){
         const newRow = tbody.insertRow()
-        rowCollumOne = i.toString(2).padStart(variaveis, '0')
+        const rowCollumOne = i.toString(2).padStart(variaveis, '0')
         for(let j = 0; j < variaveis; j++){
             const cell = newRow.insertCell()
             cell.textContent = rowCollumOne[j]
         }
-        const cellTwo = newRow.insertCell()
+        const rowCollumTwo = newRow.insertCell()
         const input = document.createElement('input')
+        // Limita quais caracteres podem ser inseridos no input
         input.addEventListener('keydown', function (event) {
-            if(event.key !== '0' && event.key !== '1' && event.key !== 'Backspace' && event.key !== 'Delete')
+            if(event.key !== '0' && event.key !== '1' && event.key != 'x' && event.key !== 'Backspace' && event.key !== 'Delete')
                 event.preventDefault()
             if(this.value.length >= 1 && event.key !== 'Backspace' && event.key !== 'Delete')
                 event.preventDefault()
-        });
+        })
+        // Adiciona o evento para atualizar a lista de valores em cada <input>
+        input.addEventListener('input', () => {
+            const truthValues = document.querySelectorAll('.truthtable-body input')
+            saveSate(truthValues)
+        })
         input.setAttribute('type', 'text')
-        input.setAttribute('title', 'Apenas 1 e 0 é permitido!')
-        cellTwo.appendChild(input)
+        input.setAttribute('title', 'Apenas "1", "0" e "x" é permitido!')
+        rowCollumTwo.appendChild(input)
         truthTable.appendChild(tbody)
     }
 }
@@ -82,7 +91,7 @@ dropdowns.forEach(dropdown => {
                 divScrollContainer.classList.add('scroll-wrapper-container')
                 divScroll.classList.add('scroll-wrapper')
                 table.classList.add('truthtable-body')
-                truthTableContainer.insertBefore(divBodyContainer, truthTableContainer.lastElementChild)
+                truthTableContainer.insertBefore(divBodyContainer, truthTableContainer.firstElementChild.nextSibling)
                 divBodyContainer.appendChild(divVariables)
                 divBodyContainer.appendChild(divScrollContainer)
                 divScrollContainer.appendChild(divScroll)
@@ -104,12 +113,6 @@ dropdowns.forEach(dropdown => {
                 option.classList.remove('active')
             })
             option.classList.add('active')
-            if(tbody){ // verifca se a tabela verdade já existe
-                tbody.addEventListener('input', () => {
-                    const truthValues = document.querySelectorAll('.truthtable-body input')
-                    saveSate(truthValues)
-                })    
-            }
         })
     })
 })
@@ -258,7 +261,8 @@ class karnaughMap {
     }
 }
 
-function simplifyMap() {
+// Cria os grupos do mapa de karnaugh e retorna o mapa agrupado
+function groupsKarnaughMap() {
     const arr = []
     const tbody = document.querySelector('.karnaughmap-body')
     const rows = tbody.querySelectorAll('tr')
@@ -292,7 +296,6 @@ function simplifyMap() {
     */
     const isolated = element => { // group: 0
         if(element.right.data === 0 && element.down.data === 0 && element.left.data === 0 && element.up.data === 0) {
-            console.log('isolado')
             element.check = true
             element.grouping[0]++
             return [element, 's']
@@ -312,7 +315,6 @@ function simplifyMap() {
             switch(trueCase){
                 case 0: // adjacent to the right
                     if(tests(element.right).filter(value => value === true).length === 1) {
-                        console.log(`adjacente caso ${trueCase}`)
                         element.check = true
                         element.grouping[1]++
                         element.right.check = true
@@ -322,7 +324,6 @@ function simplifyMap() {
                     break;
                 case 1: // adjacent to the down
                     if(tests(element.down).filter(value => value === true).length === 1) {
-                        console.log(`adjacente caso ${trueCase}`)
                         element.check = true
                         element.grouping[1]++
                         element.down.check = true
@@ -332,7 +333,6 @@ function simplifyMap() {
                     break;
                 case 2:
                     if(tests(element.left).filter(value => value === true).length === 1) {
-                        console.log(`adjacente caso ${trueCase}`)
                         element.check = true
                         element.grouping[1]++
                         element.left.check = true
@@ -342,7 +342,6 @@ function simplifyMap() {
                     break;
                 case 3:
                     if(tests(element.up).filter(value => value === true).length === 1) {
-                        console.log(`adjacente caso ${trueCase}`)
                         element.check = true
                         element.grouping[1]++
                         element.up.check = true
@@ -366,7 +365,6 @@ function simplifyMap() {
             if(test){
                 switch(index){
                     case 0:
-                        console.log(`octeto caso ${index}`)
                         e.check = true
                         e.grouping[2]++
                         e.right.check = true
@@ -386,7 +384,6 @@ function simplifyMap() {
                         octetGrouping = [e, e.right, e.right.right, e.right.right.right, e.down, e.down.right, e.down.right.right, e.down.right.right.right, 'h']
                         break;
                     case 1:
-                        console.log(`octeto caso ${index}`)
                         e.check = true
                         e.grouping[2]++
                         e.down.check = true
@@ -406,7 +403,6 @@ function simplifyMap() {
                         octetGrouping = [e, e.down, e.down.down, e.down.down.down, e.right, e.right.down, e.right.down.down, e.right.down.down.down, 'v']
                         break;
                     case 2:
-                        console.log(`octeto caso ${index}`)
                         e.check = true
                         e.grouping[2]++
                         e.down.check = true
@@ -446,7 +442,6 @@ function simplifyMap() {
             if(test){
                 switch(index){ // cases -> 'sq': square, 'h': horizontal and 'v': vertical
                     case 0: // square right and down
-                        console.log(`quarteto caso ${index}`)
                         e.check = true
                         e.grouping[3]++
                         e.right.check = true
@@ -458,7 +453,6 @@ function simplifyMap() {
                         quartetGroups = [e, e.right, e.down, e.down.right, 's']
                         break;
                     case 1: // quartet square right and up
-                        console.log(`quarteto caso ${index}`)
                         e.check = true
                         e.grouping[3]++
                         e.right.check = true
@@ -470,7 +464,6 @@ function simplifyMap() {
                         quartetGroups = [e.up, e.up.right, e, e.right, 's']
                         break;
                     case 2:
-                        console.log(`quarteto caso ${index}`)
                         e.check = true
                         e.grouping[3]++
                         e.left.check = true
@@ -482,7 +475,6 @@ function simplifyMap() {
                         quartetGroups = [e.left, e, e.down.left, e.down, 's']
                         break;
                     case 3:
-                        console.log(`quarteto caso ${index}`)
                         e.check = true
                         e.grouping[3]++
                         e.left.check = true
@@ -494,7 +486,6 @@ function simplifyMap() {
                         quartetGroups = [e.up.left, e.up,  e.left, e, 's']
                         break;
                     case 4: // quartet horizontal to right
-                        console.log(`quarteto caso ${index}`)  
                         e.check = true
                         e.grouping[3]++
                         e.right.check = true
@@ -506,7 +497,6 @@ function simplifyMap() {
                         quartetGroups = [e, e.right, e.right.right, e.right.right.right, 'h']
                         break;
                     case 5: // quartet vertical to down
-                        console.log(`quarteto caso ${index}`)
                         e.check = true
                         e.grouping[3]++
                         e.down.check = true
@@ -518,7 +508,6 @@ function simplifyMap() {
                         quartetGroups = [e, e.down, e.down.down, e.down.down.down, 'v']
                         break;
                     case 6: // quartet horizontal to left
-                        console.log(`quarteto caso ${index}`)   
                         e.check = true
                         e.grouping[3]++
                         e.left.check = true
@@ -530,7 +519,6 @@ function simplifyMap() {
                         quartetGroups = [e.left.left.left, e.left.left, e.left, e, 'h']
                         break;
                     case 7:
-                        console.log(`quarteto caso ${index}`)
                         e.check = true
                         e.grouping[3]++
                         e.up.check = true
@@ -561,7 +549,6 @@ function simplifyMap() {
             if(test) {
                 switch(index) { // cases -> 'h': horizontal and 'v' vertical
                     case 0:
-                        console.log(`duo caso ${index}`)
                         e.check = true
                         e.grouping[4]++
                         e.right.check = true
@@ -569,7 +556,6 @@ function simplifyMap() {
                         duosGroup = [e, e.right, 'h']
                         break;
                     case 1:
-                        console.log(`duo caso ${index}`)
                         e.check = true
                         e.grouping[4]++
                         e.down.check = true
@@ -577,7 +563,6 @@ function simplifyMap() {
                         duosGroup = [e, e.down, 'v']
                         break;
                     case 2:
-                        console.log(`duo caso ${index}`)
                         e.check = true
                         e.grouping[4]++
                         e.left.check = true
@@ -585,7 +570,6 @@ function simplifyMap() {
                         duosGroup = [e.left, e, 'h']
                         break;
                     case 3:
-                        console.log(`duo caso ${index}`)
                         e.check = true
                         e.grouping[4]++
                         e.up.check = true
@@ -603,7 +587,6 @@ function simplifyMap() {
     const groupTests = [isolated, adjacet, octet, quartet, duos]
     const groups = [[],[],[],[],[]]
     kmap.runsThrough(groupTests, groups) // Encontra os agrupamentos no mapa
-    console.log('groups', groups)
     groups.forEach((group, gindex) => { // Esse laço verifica grupos criados descenecessariamente
         if(gindex >= 2){ // Grupos isolados e adjacente nao precisam ser verificados
             const filteredGroup = group.filter((grouping, index) => {
@@ -629,6 +612,23 @@ function simplifyMap() {
     return groups
 }
 
+// Verifica o tipo do grupo de acordo com o indice: 0 = isolado, 1 = adjcente, ... e retorna um array: [tamanho do grupo, descrição]
+function groupSize(index) {
+    switch(index){
+        case 0:
+            return [1, 'isolated']
+        case 1:
+            return [2, 'adjacent']
+        case 2:
+            return [8, 'octet']
+        case 3:
+            return [4, 'quartet']
+        case 4:
+            return [2, 'duo']
+    }
+    return null
+}
+
 const buttonUndo = document.querySelector('[undo]')
 buttonUndo.addEventListener('click', () => {
     const truthValues = document.querySelectorAll('.truthtable-body input')
@@ -639,8 +639,6 @@ buttonUndo.addEventListener('click', () => {
         states.pop()
     }
 })
-
-// const buttonRedo
 
 const buttonComplete0 = document.querySelector('[complete0]')
 buttonComplete0.addEventListener('click', () => {
@@ -662,22 +660,25 @@ buttonComplete1.addEventListener('click', () => {
 
 const buttonCreateMap = document.querySelector('[createmap]')
 buttonCreateMap.addEventListener('click', () => {
+    events.group = false
+    events.simplify = false
     const container = document.querySelector('.container')
     const truthValues = document.querySelectorAll('.truthtable-body input')
     const rightContainer = document.querySelector('.right-side')
-    const firstDiv = rightContainer.firstChild
-    if(firstDiv){
-        firstDiv.remove()
-        rightContainer.lastChild.remove()
+    const containerKarnaughmap = rightContainer.querySelector('.container-karnaughmap')
+    if(containerKarnaughmap){
+        const simexp = rightContainer.querySelector('.simplifiedexpression')
+        if(simexp)
+            simexp.remove()
+        containerKarnaughmap.remove()
     }
-    let complete = 2
+    let truthTableComplete = 2
     truthValues.forEach(e => {
         if(!e.value)
-            complete = 0
+            truthTableComplete = 0
     })
-    if(truthValues.length === 0) complete = 1
-    if(complete === 2){
-        console.log('complete', complete)
+    if(truthValues.length === 0) truthTableComplete = 1
+    if(truthTableComplete === 2){
         container.classList.add('container-simplified')
         const divContainer = document.createElement('div')
         const divButtons = document.createElement('div')
@@ -686,6 +687,7 @@ buttonCreateMap.addEventListener('click', () => {
         const divColumn = document.createElement('div')
         const table = document.createElement('table')
         const tbody = document.createElement('tbody')
+        const buttonGroupMap = document.createElement('button')
         const buttonCreateMap = document.createElement('button')
         const variables = document.querySelector('.selected').innerText
         const step = Math.round(variables/2)
@@ -695,16 +697,23 @@ buttonCreateMap.addEventListener('click', () => {
         divContainer.appendChild(divRow)
         divContainer.appendChild(divColumn)
         divContainer.appendChild(divButtons)
+        divContainer.appendChild(table)
+        divButtons.appendChild(buttonGroupMap)
         divButtons.appendChild(buttonCreateMap)
+        table.appendChild(tbody)
         divContainer.classList.add('container-karnaughmap')
         divButtons.classList.add('karnaughmap-buttons')
-        buttonCreateMap.classList.add('simplifymap')
+        buttonGroupMap.setAttribute('group-map', '')
+        buttonGroupMap.innerText = 'Agrupar'
+        buttonCreateMap.setAttribute('simplify-map', '')
         buttonCreateMap.innerText = 'Simplificar'
         divRow.classList.add('karnaughmap-row')
         divColumn.classList.add('karnaughmap-column')
         table.classList.add('karnaughmap')
         tbody.classList.add('karnaughmap-body')
-        for(let i = 0; i < variables; i+=step){ // Esse laço cria uma tabela vazia que representa o mapa de karnaugh e adiciona os caracteres da linha e coluna externa.
+
+        // Esse laço cria uma tabela vazia que representa o mapa de karnaugh e adiciona os caracteres da linha e coluna externa.
+        for(let i = 0; i < variables; i+=step){ 
             const aux = Math.min(i+step, variables)-i
             let columnComplete = false // Verfica se a coluna externa ja foi completada
             if(i == step)
@@ -787,8 +796,9 @@ buttonCreateMap.addEventListener('click', () => {
                     break;
             }
         }
-        table.appendChild(tbody)
-        mapping.forEach((e, index) => { // Coloca os valores mapeados na tabela do mapa de karnaugh
+
+        // Coloca os valores mapeados na tabela, da última coluna, no mapa de karnaugh
+        mapping.forEach((e, index) => { 
             let row, column, string = ''
             const values = Object.values(e)
             switch(step){
@@ -817,106 +827,60 @@ buttonCreateMap.addEventListener('click', () => {
             const cell = tbody.querySelector(`tr[row='${row}'] td[column='${column}']`)
             cell.innerText = values[values.length-1] // Pega o valor da última propriedade do objeto e atribui à célula.
         })
-        divContainer.appendChild(table)
-        const kmapSimplifyed = simplifyMap()
-        console.log('kmapSimplified', kmapSimplifyed)
-        let zIndexMax = 0, numberClusters = 1 // zIndexMax armazena o maior z-index e 
-        kmapSimplifyed.forEach((group, gindex) => { // Esse laço personaliza (adiciona bordas) para os agrupamentos.
-            group.forEach((e, eindex) => {
-                switch(gindex){
-                    case 0: // isolated
-                        console.log('grupo isolado')
-                        const cell = tbody.rows[e[0].rindex].cells[e[0].cindex]
+
+        let groupedMap
+        const groupedKarnaughMap = new Promise((resolve) => {
+            buttonGroupMap.addEventListener('click', () => resolve(groupsKarnaughMap()))
+        })
+        groupedKarnaughMap
+        .then(gkm => {
+            let zIndexMax = 0, groupNumber = 1 // 'zIndexMax' armazena o maior <z-index> da tabela e 'groupNumber' o n-esimo grupo
+            // Esse laço personaliza (adiciona bordas) para os agrupamentos
+            gkm.forEach((group, gindex) => {
+                group.forEach(e => {
+                    let gs = groupSize(gindex)
+                    console.log(`gs: ${gs}`)
+                    for(let j = 0; j < gs[0]; j++){
+                        const cell = tbody.rows[e[j].rindex].cells[e[j].cindex]
                         const a = document.createElement('a')
-                        a.style.zIndex = cell.childElementCount+1
-                        zIndexMax++
-                        a.setAttribute('isolated', 's')
-                        a.classList.add(`group${numberClusters}`)
+                        a.style.zIndex = 1
+                        a.setAttribute(`${gs[1]}-case${e[e.length-1]}`, `${j}`)
+                        a.classList.add(`group${groupNumber}`)
                         a.classList.add('item')
                         cell.appendChild(a)
-                        break;
-                    case 1: // adjacent
-                        console.log('grupo adjacente')
-                        for(let i = 0; i < 2; i++){
-                            const cell = tbody.rows[e[i].rindex].cells[e[i].cindex]
-                            const a = document.createElement('a')
-                            a.style.zIndex = cell.childElementCount+1
-                            zIndexMax++
-                            a.setAttribute(`adjacent-case${e[e.length-1]}`, `${i}`)
-                            a.classList.add(`group${numberClusters}`)
-                            a.classList.add('item')
-                            cell.appendChild(a)
-                        }
-                    break;
-                    case 2:
-                        for(let i = 0; i < 8; i++){
-                            const cell = tbody.rows[e[i].rindex].cells[e[i].cindex]
-                            const a = document.createElement('a')
-                            a.style.zIndex = cell.childElementCount+1
-                            zIndexMax++
-                            a.setAttribute(`octet-case${e[e.length-1]}`, `${i}`)
-                            a.classList.add(`group${numberClusters}`)
-                            a.classList.add('item')
-                            cell.appendChild(a)
-                        }
-                        break;
-                    case 3: // quartet
-                        console.log('grupo quarteto')
-                        for(let i = 0; i < 4; i++){
-                            const cell = tbody.rows[e[i].rindex].cells[e[i].cindex]
-                            const a = document.createElement('a')
-                            a.style.zIndex = cell.childElementCount+1
-                            zIndexMax++
-                            a.setAttribute(`quartet-case${e[e.length-1]}`, `${i}`)
-                            a.classList.add(`group${numberClusters}`)
-                            a.classList.add('item')
-                            cell.appendChild(a)
-                        }
-                        break;
-                    case 4: // duos
-                        console.log('grupo duo')
-                        for(let i = 0; i < 2; i++){
-                            const cell = tbody.rows[e[i].rindex].cells[e[i].cindex]
-                            const a = document.createElement('a')
-                            a.style.zIndex = cell.childElementCount+1
-                            zIndexMax++
-                            a.setAttribute(`duo-case${e[e.length-1]}`, `${i}`)
-                            a.classList.add(`group${numberClusters}`)
-                            a.classList.add('item')
-                            cell.appendChild(a)
-                        }
-                        break;
-                }
-                numberClusters++
+                        a.addEventListener('mouseenter', () => {
+                            const gn = [...a.classList].find(cls => cls.startsWith('group')) // gn - group number
+                            document.querySelectorAll(`.${gn}`).forEach(el => {
+                                console.log(el)
+                                el.style.zIndex = 20
+                                el.classList.add('hover-group')})
+                        })
+                        a.addEventListener('mouseleave', () => {
+                            const gn = [...a.classList].find(cls => cls.startsWith('group'));
+                            document.querySelectorAll(`.${gn}`).forEach(el => {
+                                el.style.zIndex = 1
+                                el.classList.remove('hover-group')})
+                        })
+                    }
+                    zIndexMax++
+                    groupNumber++
+                })
             })
+            groupedMap = gkm
+            events.group = true
         })
-        const buttonSimplifyMap = document.querySelector('.simplifymap')
+
+        // Aparitr do mapa de karnaugh, cria a expressão simplificada
+        const buttonSimplifyMap = document.querySelector('[simplify-map]')
         const simplifiedE = document.createElement('p') // Simplified Expression
         const divSimplified = document.createElement('div')
         simplifiedE.append('X = ')
         divSimplified.classList.add('simplifiedexpression')
         buttonSimplifyMap.addEventListener('click', () => {
-            if(complete){
-                kmapSimplifyed.forEach((group, gindex) => {
-                    let expression = '', i
-                    switch(gindex){ // verifica o tipo do grupo: isolado, adjcente, ..., para saber o tamanho do laço
-                        case 0:
-                            i = 0
-                            break;
-                        case 1:
-                            i = 2;
-                            break
-                        case 2:
-                            i = 8
-                            break;
-                        case 3:
-                            i = 4;
-                            break;
-                        case 4:
-                            i = 2;
-                            break;
-                    }
-                    if(i === 0){ // grupo isolado
+            if(truthTableComplete && events.group && !events.simplify){
+                groupedMap.forEach((group, gindex) => {
+                    let expression = '', gs = groupSize(gindex)
+                    if(gs[0] === 0){ // grupo isolado
                         group.forEach((e, j) => {
                             let expression = document.createElement('p')
                             if(simplifiedE.lastElementChild !== null)
@@ -936,7 +900,7 @@ buttonCreateMap.addEventListener('click', () => {
                             const spansPorTexto = {}
                             if(simplifiedE.lastElementChild !== null)
                                 simplifiedE.append(' + ')
-                            for(let j = 0; j < i; j++){
+                            for(let j = 0; j < gs[0]; j++){
                                 divColumn.children[e[j].rindex].querySelectorAll(':not(:last-child)').forEach(e => expression.appendChild(e.cloneNode(true)))
                                 divRow.children[e[j].cindex].querySelectorAll(':not(:last-child)').forEach(e => expression.appendChild(e.cloneNode(true)))
                             }
@@ -952,7 +916,6 @@ buttonCreateMap.addEventListener('click', () => {
                                     spansPorTexto[texto][span.classList.contains('overline')][1] = span
                                 }
                             })
-                            console.log('spantexto', spansPorTexto)
                             for(let text in spansPorTexto){
                                 const e = spansPorTexto[text]
                                 if(!(e.true[0] === 1 && e.false[0] === 1)){
@@ -972,9 +935,74 @@ buttonCreateMap.addEventListener('click', () => {
                 setTimeout(() => {
                     divSimplified.classList.add('show');
                 }, 50);
+                events.simplify = true
             }
-        }, { once: true })
+        })
     }else{
         console.log('Complete a tabela!')
     }
 })
+
+const png = document.querySelector('[file-format="png"]')
+png.addEventListener('click', event => {
+    const table = document.querySelector('.truthtable-body');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    // Ajusta o tamanho do canvas ao tamanho da tabela
+    const rect = table.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    // Estilize a tabela no canvas
+    context.font = '16px Arial';
+    context.textAlign = 'left';
+    context.fillStyle = '#000';
+
+    // Copia conteúdo da tabela
+    Array.from(table.rows).forEach((row, rowIndex) => {
+    Array.from(row.cells).forEach((cell, cellIndex) => {
+        const x = cellIndex * (rect.width / row.cells.length);
+        const y = rowIndex * 30; // Altura estimada de uma linha
+        context.fillText(cell.textContent, x + 10, y + 20);
+    });
+    });
+
+    // Converte o canvas para uma imagem
+    const link = document.createElement('a');
+    link.download = 'tabela.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+})
+
+// const tab = document.querySelector('[data-create-tab]')
+// tab.addEventListener('click', e => {
+//     const divTabs = document.querySelector('.tabs')
+//     const penultimateChild = divTabs.children[divTabs.children.length - 2]
+//     const tabNumber = penultimateChild.getAttribute('data-tab')*1+1
+//     if(tabNumber <= 3){
+//         const newTab = document.createElement('div')
+//         const tableTitle = document.querySelector('.truthtable-head-select h1')
+//         newTab.classList.add('tab', 'active')
+//         newTab.setAttribute('data-tab', `${tabNumber}`)
+//         newTab.innerHTML = `Aba ${tabNumber}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>`
+//         // tableTitle.innerText += ` ${tabNumber}`
+//         penultimateChild.after(newTab)
+//         if(tabNumber === 3)
+//             newTab.nextElementSibling.remove()
+//         const svg = newTab.querySelector('svg')
+//         svg.addEventListener('click', e => {
+//             let previousSibling = newTab
+//             let nextSibling = newTab.nextElementSibling
+//             while(nextSibling){
+//                 nextSibling.innerHTML = previousSibling.innerHTML
+//                 previousSibling = nextSibling
+//                 nextSibling = nextSibling.nextElementSibling
+//             }
+//             newTab.classList.add('removed')
+//             setTimeout(() => {
+//                 newTab.remove()
+//             }, 300); // O tempo aqui deve ser igual ao tempo de transição do CSS
+//         })
+//     }
+// })
